@@ -8,26 +8,26 @@
   --font-sans: 'Open Sans', sans-serif;
 
   --background: 0 0% 100%;
-  --foreground: 210 17% 24%; /* #333E48 */
+  --foreground: 0 0% 13%; /* #222222 dark text */
 
-  --primary: 196 89% 55%; /* #26BFF1 */
+  --primary: 0 0% 17%; /* #2B2B2B dark gray from logo */
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 210 17% 24%; /* #333E48 */
+  --secondary: 0 0% 13%; /* #222222 */
   --secondary-foreground: 0 0% 100%;
 
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
 
-  --accent: 196 89% 55%;
+  --accent: 0 0% 17%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 0 0% 98%;
 
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 196 89% 55%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 0 0% 17%;
 
   --radius: 0.3rem;
 }
@@ -40,7 +40,7 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight text-[#333E48];
+    @apply font-bold tracking-tight text-[#222222];
   }
 }
 

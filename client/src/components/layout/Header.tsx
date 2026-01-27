@@ -62,9 +62,8 @@ export function Header() {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 mr-8 cursor-pointer">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-2xl">A</div>
-              <span className="text-3xl font-extrabold tracking-tighter text-[#333E48]">AMROD</span>
+            <div className="flex items-center gap-3">
+              <img src="/images/wos-apex-logo.jpg" alt="WOS APEX" className="h-12 w-auto rounded" />
             </div>
           </Link>
 
