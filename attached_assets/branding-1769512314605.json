@@ -1,0 +1,100 @@
+{
+  "colorScheme": "light",
+  "fonts": [
+    {
+      "family": "Open Sans",
+      "count": 81
+    },
+    {
+      "family": "Helvetica",
+      "count": 81
+    },
+    {
+      "family": "Arial",
+      "count": 81
+    },
+    {
+      "family": "sans-serif",
+      "count": 81
+    },
+    {
+      "family": "Font Awesome 6 Brands",
+      "count": 1
+    }
+  ],
+  "colors": {
+    "primary": "#26BFF1",
+    "accent": "#333E48",
+    "background": "#FFFFFF",
+    "textPrimary": "#333E48",
+    "link": "#333E48"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Open Sans",
+      "heading": "Open Sans"
+    },
+    "fontStacks": {
+      "body": [
+        "Open Sans",
+        "Helvetica",
+        "Arial",
+        "sans-serif"
+      ],
+      "heading": [
+        "Open Sans",
+        "Helvetica",
+        "Arial",
+        "sans-serif"
+      ],
+      "paragraph": [
+        "Open Sans",
+        "Helvetica",
+        "Arial",
+        "sans-serif"
+      ]
+    },
+    "fontSizes": {
+      "h1": "14px",
+      "h2": "32px",
+      "body": "20px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 4,
+    "borderRadius": "5px"
+  },
+  "components": {
+    "input": {
+      "background": "#FFFFFF",
+      "textColor": "#818181",
+      "borderColor": "#26BFF1",
+      "borderRadius": "0px",
+      "borderRadiusCorners": {
+        "topLeft": "0px",
+        "topRight": "0px",
+        "bottomRight": "0px",
+        "bottomLeft": "0px"
+      },
+      "shadow": "none"
+    }
+  },
+  "images": {
+    "logo": "https://assets.promoafrica.com/webassets/logo/amrod-logo-color-plain.png",
+    "favicon": "https://assets.promoafrica.com/webassets/logo/favicon.ico",
+    "ogImage": null
+  },
+  "__framework_hints": [
+    "bootstrap"
+  ],
+  "__llm_logo_reasoning": {
+    "selectedIndex": 0,
+    "reasoning": "Strong indicators: variant bonus (+8), header logo linking to homepage, header location, visible, top-left position, highest logo on page, src contains logo, class contains logo, alt exactly matches brand name \"Amrod\", src contains brand name \"Amrod\", reasonable size. Score: 156 (clear winner by 135 points)",
+    "confidence": 0.9
+  },
+  "confidence": {
+    "buttons": 0,
+    "colors": 0,
+    "overall": 0
+  }
+}

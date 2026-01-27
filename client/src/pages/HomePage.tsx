@@ -54,9 +54,9 @@ export default function HomePage() {
                   Browse Catalog
                 </button>
               </Link>
-              <Link href="/auth">
+              <Link href="/category/gifts">
                 <button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm px-8 py-4 rounded-xl font-bold text-lg transition-all hover:-translate-y-1">
-                  Reseller Login
+                  View Gifts
                 </button>
               </Link>
             </div>
@@ -91,8 +91,8 @@ export default function HomePage() {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900">Reseller Only</h3>
-                <p className="text-sm text-gray-500">Protecting your margins</p>
+                <h3 className="font-bold text-gray-900">Fast Delivery</h3>
+                <p className="text-sm text-gray-500">Industry-leading turnaround</p>
               </div>
             </div>
           </div>
