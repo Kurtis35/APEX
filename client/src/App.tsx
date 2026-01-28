@@ -8,6 +8,11 @@ import HomePage from "@/pages/HomePage";
 import ProductListing from "@/pages/ProductListing";
 import ProductDetail from "@/pages/ProductDetail";
 import AuthPage from "@/pages/AuthPage";
+import CartPage from "@/pages/CartPage";
+import CheckoutPage from "@/pages/CheckoutPage";
+import AdminPage from "@/pages/AdminPage";
+import { CartProvider } from "@/contexts/CartContext";
+import { AdminProvider } from "@/contexts/AdminContext";
 
 function Router() {
   return (
@@ -16,7 +21,9 @@ function Router() {
       <Route path="/category/:slug" component={ProductListing} />
       <Route path="/product/:id" component={ProductDetail} />
       <Route path="/auth" component={AuthPage} />
-      {/* Fallback to 404 */}
+      <Route path="/cart" component={CartPage} />
+      <Route path="/checkout" component={CheckoutPage} />
+      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -26,8 +33,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <AdminProvider>
+          <CartProvider>
+            <Toaster />
+            <Router />
+          </CartProvider>
+        </AdminProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

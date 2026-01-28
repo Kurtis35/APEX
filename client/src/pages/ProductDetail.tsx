@@ -1,23 +1,36 @@
+import { useState } from "react";
 import { useParams, Link } from "wouter";
 import { Layout } from "@/components/layout/Layout";
 import { useProduct, useProducts } from "@/hooks/use-products";
-import { useAuth } from "@/hooks/use-auth";
+import { useCart } from "@/contexts/CartContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ProductCard } from "@/components/product/ProductCard";
-import { Check, Shield, Truck, Package, Lock } from "lucide-react";
+import { Check, Shield, Truck, Package, ShoppingCart, Plus, Minus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { data: product, isLoading } = useProduct(Number(id));
-  const { user } = useAuth();
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+  const [quantity, setQuantity] = useState(1);
   
-  // Fetch related products (same category)
   const { data: relatedProducts } = useProducts(
     product ? { category: product.category } : undefined
   );
+
+  const handleAddToCart = async () => {
+    if (product) {
+      await addToCart(product.id, quantity);
+      toast({
+        title: "Added to cart",
+        description: `${quantity}x ${product.name} added to your cart`,
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -117,29 +130,12 @@ export default function ProductDetail() {
 
               {/* Price Block */}
               <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 mb-8">
-                {user ? (
-                  <div className="flex items-end gap-4">
-                    <div className="space-y-1">
-                      <p className="text-sm text-gray-500 font-medium">Reseller Price (Excl. VAT)</p>
-                      <p className="text-4xl font-extrabold text-primary">R {price}</p>
-                    </div>
+                <div className="flex items-end gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm text-gray-500 font-medium">Price (Excl. VAT)</p>
+                    <p className="text-4xl font-extrabold text-primary">R {price}</p>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-4">
-                     <div className="p-3 bg-white rounded-full shadow-sm text-orange-500">
-                       <Lock className="w-6 h-6" />
-                     </div>
-                     <div>
-                       <h3 className="font-bold text-gray-900">Login to view pricing</h3>
-                       <p className="text-sm text-gray-500">Exclusive wholesale pricing for registered resellers.</p>
-                     </div>
-                     <Link href="/auth">
-                       <Button variant="outline" className="ml-auto border-primary text-primary hover:bg-primary hover:text-white">
-                         Login Now
-                       </Button>
-                     </Link>
-                  </div>
-                )}
+                </div>
               </div>
 
               {/* Description */}
@@ -186,13 +182,39 @@ export default function ProductDetail() {
                 </div>
               </div>
               
+              {/* Quantity Selector */}
+              <div className="mt-8 flex items-center gap-4">
+                <span className="font-semibold text-gray-700">Quantity:</span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    data-testid="button-decrease-qty"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </Button>
+                  <span className="w-12 text-center font-bold text-lg">{quantity}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setQuantity(quantity + 1)}
+                    data-testid="button-increase-qty"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
               {/* Action Buttons */}
-              <div className="mt-8 flex gap-4">
-                 <Button className="flex-1 bg-primary hover:bg-primary/90 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-primary/20">
-                   Add to Quote
-                 </Button>
-                 <Button variant="outline" className="flex-1 h-14 text-lg font-bold rounded-xl border-2 hover:bg-gray-50">
-                   Download Spec Sheet
+              <div className="mt-6 flex gap-4">
+                 <Button 
+                   className="flex-1 bg-primary hover:bg-primary/90 text-white h-14 text-lg font-bold rounded-xl shadow-lg shadow-primary/20"
+                   onClick={handleAddToCart}
+                   data-testid="button-add-to-cart"
+                 >
+                   <ShoppingCart className="w-5 h-5 mr-2" />
+                   Add to Cart
                  </Button>
               </div>
             </div>

@@ -2,20 +2,45 @@ import { db } from "./db";
 import {
   products,
   categories,
+  cartItems,
+  orders,
+  orderItems,
+  admins,
   type Product,
   type InsertProduct,
   type Category,
-  type InsertCategory
+  type InsertCategory,
+  type CartItem,
+  type InsertCartItem,
+  type Order,
+  type InsertOrder,
+  type OrderItem,
+  type InsertOrderItem,
+  type Admin,
+  type InsertAdmin
 } from "@shared/schema";
-import { eq, ilike } from "drizzle-orm";
+import { eq, ilike, and } from "drizzle-orm";
 import { authStorage, type IAuthStorage } from "./replit_integrations/auth";
+import bcrypt from "bcrypt";
 
 export interface IStorage extends IAuthStorage {
   getProducts(category?: string, search?: string): Promise<Product[]>;
   getProduct(id: number): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined>;
+  deleteProduct(id: number): Promise<boolean>;
   getCategories(): Promise<Category[]>;
   createCategory(category: InsertCategory): Promise<Category>;
+  getCartItems(sessionId: string): Promise<(CartItem & { product: Product })[]>;
+  addToCart(sessionId: string, productId: number, quantity: number): Promise<CartItem>;
+  updateCartItem(id: number, quantity: number): Promise<CartItem | undefined>;
+  removeFromCart(id: number): Promise<boolean>;
+  clearCart(sessionId: string): Promise<void>;
+  createOrder(order: InsertOrder): Promise<Order>;
+  createOrderItems(items: InsertOrderItem[]): Promise<OrderItem[]>;
+  getOrders(): Promise<Order[]>;
+  getAdmin(username: string): Promise<Admin | undefined>;
+  validateAdminPassword(username: string, password: string): Promise<boolean>;
   seedData(): Promise<void>;
 }
 
@@ -45,7 +70,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
-    const [newProduct] = await db.insert(products).values(product).returning();
+    const [newProduct] = await db.insert(products).values({
+      ...product,
+      brandingOptions: product.brandingOptions || [],
+    }).returning();
     return newProduct;
   }
 
@@ -58,7 +86,99 @@ export class DatabaseStorage implements IStorage {
     return newCategory;
   }
 
+  async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined> {
+    const updateData: any = { ...product };
+    if (product.brandingOptions) {
+      updateData.brandingOptions = product.brandingOptions as string[];
+    }
+    const [updated] = await db.update(products).set(updateData).where(eq(products.id, id)).returning();
+    return updated;
+  }
+
+  async deleteProduct(id: number): Promise<boolean> {
+    const result = await db.delete(products).where(eq(products.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async getCartItems(sessionId: string): Promise<(CartItem & { product: Product })[]> {
+    const items = await db.select().from(cartItems).where(eq(cartItems.sessionId, sessionId));
+    const result = [];
+    for (const item of items) {
+      const product = await this.getProduct(item.productId);
+      if (product) {
+        result.push({ ...item, product });
+      }
+    }
+    return result;
+  }
+
+  async addToCart(sessionId: string, productId: number, quantity: number): Promise<CartItem> {
+    const existing = await db.select().from(cartItems)
+      .where(and(eq(cartItems.sessionId, sessionId), eq(cartItems.productId, productId)));
+    
+    if (existing.length > 0) {
+      const [updated] = await db.update(cartItems)
+        .set({ quantity: existing[0].quantity + quantity })
+        .where(eq(cartItems.id, existing[0].id))
+        .returning();
+      return updated;
+    }
+    
+    const [newItem] = await db.insert(cartItems)
+      .values({ sessionId, productId, quantity })
+      .returning();
+    return newItem;
+  }
+
+  async updateCartItem(id: number, quantity: number): Promise<CartItem | undefined> {
+    const [updated] = await db.update(cartItems)
+      .set({ quantity })
+      .where(eq(cartItems.id, id))
+      .returning();
+    return updated;
+  }
+
+  async removeFromCart(id: number): Promise<boolean> {
+    const result = await db.delete(cartItems).where(eq(cartItems.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async clearCart(sessionId: string): Promise<void> {
+    await db.delete(cartItems).where(eq(cartItems.sessionId, sessionId));
+  }
+
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const [newOrder] = await db.insert(orders).values(order).returning();
+    return newOrder;
+  }
+
+  async createOrderItems(items: InsertOrderItem[]): Promise<OrderItem[]> {
+    const newItems = await db.insert(orderItems).values(items).returning();
+    return newItems;
+  }
+
+  async getOrders(): Promise<Order[]> {
+    return await db.select().from(orders);
+  }
+
+  async getAdmin(username: string): Promise<Admin | undefined> {
+    const [admin] = await db.select().from(admins).where(eq(admins.username, username));
+    return admin;
+  }
+
+  async validateAdminPassword(username: string, password: string): Promise<boolean> {
+    const admin = await this.getAdmin(username);
+    if (!admin) return false;
+    return await bcrypt.compare(password, admin.password);
+  }
+
   async seedData(): Promise<void> {
+    const existingAdmins = await db.select().from(admins);
+    if (existingAdmins.length === 0) {
+      const hashedPassword = await bcrypt.hash("admin123", 10);
+      await db.insert(admins).values({ username: "admin", password: hashedPassword });
+    }
+
     const existingCats = await this.getCategories();
     if (existingCats.length === 0) {
       const cats = [
@@ -73,8 +193,10 @@ export class DatabaseStorage implements IStorage {
       for (const cat of cats) {
         await this.createCategory(cat);
       }
+    }
 
-      // Seed products for each category with real Amrod products
+    const existingProducts = await this.getProducts();
+    if (existingProducts.length === 0) {
       const amrodProducts = [
         // Gifts - Drinkware
         {
