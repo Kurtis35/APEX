@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist/public"
+
+# SPA (Single Page Application) redirect - all routes that don't match a file
+# are redirected to index.html so client-side routing can handle them
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
