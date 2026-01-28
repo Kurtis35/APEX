@@ -1,29 +1,47 @@
-# Amrod E-Commerce Platform
+# WOS APEX / Amrod E-Commerce Platform
 
 ## Overview
 
-This is an e-commerce platform for Amrod, Africa's leading supplier of promotional products, corporate clothing, and gifts. The application provides a product catalog with category browsing, product details, and authentication for resellers. It features a modern React frontend with a Node.js/Express backend, using PostgreSQL for data persistence.
+This is a modern, world-class e-commerce platform for WOS APEX/Amrod, Africa's leading supplier of promotional products, corporate clothing, and gifts. The application features a fresh, mobile-ready design with full shopping cart functionality, checkout system, and admin dashboard. Customers can browse and purchase without creating accounts - they only provide details at checkout.
+
+## Recent Changes (January 2026)
+
+- Complete modern UI redesign with Inter font and cyan/blue color scheme
+- Mobile-responsive header with hamburger menu and gradient navigation
+- Modern hero section with animated background
+- Redesigned product cards with hover effects and quick-add-to-cart
+- Polished cart and checkout pages with modern styling
+- Beautiful auth page with split-panel design
+- Updated footer with modern dark gradient design
+- Session-based cart system (no login required for shopping)
+- Prices visible to everyone without login
+- 22 real Amrod products with actual images and South African Rand pricing
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- Preferred communication style: Simple, everyday language
+- Design style: Modern, clean, professional with cyan/blue accent colors
+- No user accounts required for shopping (guest checkout only)
+- Prices visible to all visitors
 
 ## System Architecture
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
 - **Routing**: Wouter (lightweight alternative to React Router)
-- **State Management**: TanStack React Query for server state caching and synchronization
-- **Styling**: Tailwind CSS with shadcn/ui component library (New York style)
+- **State Management**: TanStack React Query for server state, React Context for cart
+- **Styling**: Tailwind CSS with shadcn/ui component library
+- **Typography**: Inter font family
 - **Animations**: Framer Motion for page transitions and micro-interactions
 - **Build Tool**: Vite with hot module replacement
 
 The frontend follows a component-based architecture with:
-- `pages/` - Route-level components (HomePage, ProductListing, ProductDetail, AuthPage)
+- `pages/` - Route-level components (HomePage, ProductListing, ProductDetail, AuthPage, CartPage, CheckoutPage, AdminPage)
 - `components/layout/` - Shared layout components (Header, Footer, Layout wrapper)
 - `components/product/` - Product-specific components (ProductCard)
 - `components/ui/` - Reusable shadcn/ui components
-- `hooks/` - Custom React hooks for data fetching and auth state
+- `contexts/` - React Context providers (CartContext, AdminContext)
+- `hooks/` - Custom React hooks for data fetching
 
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
@@ -41,15 +59,27 @@ The backend follows a modular structure:
 ### Data Models
 - **Products**: id, name, description, category, price (stored in cents), imageUrl, stockStatus, brandingOptions (JSONB array)
 - **Categories**: id, name, slug, imageUrl
-- **Users**: id, email, firstName, lastName, profileImageUrl, timestamps (for Replit Auth)
-- **Sessions**: PostgreSQL-backed session storage for authentication
+- **Cart Items**: Session-based cart storage
+- **Orders**: Customer info, shipping address, order items
+- **Users**: id, email, firstName, lastName, profileImageUrl (for Replit Auth)
+- **Sessions**: PostgreSQL-backed session storage
 
 ### API Structure
-The API is defined in `shared/routes.ts` with typed endpoints:
 - `GET /api/products` - List products with optional category/search filters
 - `GET /api/products/:id` - Get single product
 - `GET /api/categories` - List all categories
-- `GET /api/auth/user` - Get authenticated user (protected)
+- `GET /api/cart` - Get cart items
+- `POST /api/cart` - Add item to cart
+- `PATCH /api/cart/:id` - Update cart item quantity
+- `DELETE /api/cart/:id` - Remove item from cart
+- `POST /api/checkout` - Place order
+- `GET /api/auth/user` - Get authenticated user
+- Admin endpoints at `/api/admin/*`
+
+### Admin System
+- Access via shield icon in header
+- Credentials: username "admin", password "admin123"
+- Full CRUD operations for products
 
 ### Build System
 - Development: Vite dev server with HMR, proxied through Express
@@ -73,5 +103,5 @@ The API is defined in `shared/routes.ts` with typed endpoints:
 - **Lucide React**: Icon library
 
 ### Third-Party Services
-- **Google Fonts**: Open Sans font family loaded via CDN
-- Branding assets reference external CDN URLs (promoafrica.com, amrod.co.za)
+- **Google Fonts**: Inter font family loaded via CDN
+- Product images from Amrod CDN (https://cdn.promoafrica.com)
