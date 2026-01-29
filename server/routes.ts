@@ -178,5 +178,15 @@ export async function registerRoutes(
     res.json(orders);
   });
 
+  app.get("/api/site-settings", async (req, res) => {
+    const settings = await storage.getSiteSettings();
+    res.json(settings);
+  });
+
+  app.patch("/api/admin/site-settings", requireAdmin, async (req, res) => {
+    const settings = await storage.updateSiteSettings(req.body);
+    res.json(settings);
+  });
+
   return httpServer;
 }

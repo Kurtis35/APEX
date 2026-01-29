@@ -6,6 +6,7 @@ import {
   orders,
   orderItems,
   admins,
+  siteSettings,
   type Product,
   type InsertProduct,
   type Category,
@@ -17,7 +18,9 @@ import {
   type OrderItem,
   type InsertOrderItem,
   type Admin,
-  type InsertAdmin
+  type InsertAdmin,
+  type SiteSettings,
+  type InsertSiteSettings
 } from "@shared/schema";
 import { eq, ilike, and } from "drizzle-orm";
 import { authStorage, type IAuthStorage } from "./replit_integrations/auth";
@@ -41,6 +44,8 @@ export interface IStorage extends IAuthStorage {
   getOrders(): Promise<Order[]>;
   getAdmin(username: string): Promise<Admin | undefined>;
   validateAdminPassword(username: string, password: string): Promise<boolean>;
+  getSiteSettings(): Promise<SiteSettings>;
+  updateSiteSettings(settings: Partial<InsertSiteSettings>): Promise<SiteSettings>;
   seedData(): Promise<void>;
 }
 
@@ -177,12 +182,36 @@ export class DatabaseStorage implements IStorage {
     return await bcrypt.compare(password, admin.password);
   }
 
+  async getSiteSettings(): Promise<SiteSettings> {
+    const [settings] = await db.select().from(siteSettings).where(eq(siteSettings.id, 1));
+    if (!settings) {
+      const [newSettings] = await db.insert(siteSettings).values({
+        backgroundColor: "0 0% 100%",
+        textColor: "0 0% 0%",
+        primaryColor: "221 83% 53%",
+      }).returning();
+      return newSettings;
+    }
+    return settings;
+  }
+
+  async updateSiteSettings(settings: Partial<InsertSiteSettings>): Promise<SiteSettings> {
+    const existing = await this.getSiteSettings();
+    const [updated] = await db.update(siteSettings)
+      .set({ ...settings, updatedAt: new Date() })
+      .where(eq(siteSettings.id, existing.id))
+      .returning();
+    return updated;
+  }
+
   async seedData(): Promise<void> {
     const existingAdmins = await db.select().from(admins);
     if (existingAdmins.length === 0) {
       const hashedPassword = await bcrypt.hash("jaunapex", 10);
-      await db.insert(admins).values({ username: "jaunapex", password: hashedPassword });
+      await db.insert(admins).values({ username: "wosapex", password: hashedPassword });
     }
+    
+    await this.getSiteSettings();
 
     const existingCats = await this.getCategories();
     if (existingCats.length === 0) {
