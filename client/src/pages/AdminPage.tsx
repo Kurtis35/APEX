@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Pencil, Trash2, Plus, Save, X, LogOut, Package } from "lucide-react";
+import { Pencil, Trash2, Plus, Save, X, LogOut, Package, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import { useAdmin } from "@/contexts/AdminContext";
 import { Layout } from "@/components/layout/Layout";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Product } from "@shared/schema";
+import type { Product, SiteSettings } from "@shared/schema";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function AdminPage() {
   const [, setLocation] = useLocation();
@@ -32,6 +38,7 @@ export default function AdminPage() {
   const { toast } = useToast();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [showThemeSettings, setShowThemeSettings] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -44,6 +51,20 @@ export default function AdminPage() {
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["/api/admin/products"],
     enabled: isAdmin,
+  });
+
+  const { data: siteSettings } = useQuery<SiteSettings>({
+    queryKey: ["/api/site-settings"],
+  });
+
+  const themeMutation = useMutation({
+    mutationFn: async (data: Partial<SiteSettings>) => {
+      return apiRequest("PATCH", "/api/admin/site-settings", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/site-settings"] });
+      toast({ title: "Theme updated successfully" });
+    },
   });
 
   const updateMutation = useMutation({
@@ -154,6 +175,9 @@ export default function AdminPage() {
             <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           </div>
           <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setShowThemeSettings(!showThemeSettings)} data-testid="button-theme-settings">
+              <Palette className="w-4 h-4 mr-2" /> Theme
+            </Button>
             <Button onClick={() => setIsAddingNew(true)} data-testid="button-add-product">
               <Plus className="w-4 h-4 mr-2" /> Add Product
             </Button>
@@ -162,6 +186,56 @@ export default function AdminPage() {
             </Button>
           </div>
         </div>
+
+        {showThemeSettings && siteSettings && (
+          <Card className="mb-8 animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Palette className="w-5 h-5" /> Site Appearance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label>Background Color (HSL)</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={siteSettings.backgroundColor}
+                      onChange={(e) => themeMutation.mutate({ backgroundColor: e.target.value })}
+                      placeholder="0 0% 100%"
+                    />
+                    <div className="w-10 h-10 border rounded" style={{ backgroundColor: `hsl(${siteSettings.backgroundColor})` }} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Text Color (HSL)</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={siteSettings.textColor}
+                      onChange={(e) => themeMutation.mutate({ textColor: e.target.value })}
+                      placeholder="0 0% 0%"
+                    />
+                    <div className="w-10 h-10 border rounded" style={{ backgroundColor: `hsl(${siteSettings.textColor})` }} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Primary Color (HSL)</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={siteSettings.primaryColor}
+                      onChange={(e) => themeMutation.mutate({ primaryColor: e.target.value })}
+                      placeholder="221 83% 53%"
+                    />
+                    <div className="w-10 h-10 border rounded" style={{ backgroundColor: `hsl(${siteSettings.primaryColor})` }} />
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                Use H S% L% format (e.g., 221 83% 53%). Changes apply instantly across the site.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {isLoading ? (
           <div className="flex items-center justify-center h-64">

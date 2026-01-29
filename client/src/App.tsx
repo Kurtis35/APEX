@@ -1,6 +1,6 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -13,6 +13,26 @@ import CheckoutPage from "@/pages/CheckoutPage";
 import AdminPage from "@/pages/AdminPage";
 import { CartProvider } from "@/contexts/CartContext";
 import { AdminProvider } from "@/contexts/AdminContext";
+import { useEffect } from "react";
+
+import { SiteSettings } from "@shared/schema";
+
+function ThemeManager() {
+  const { data: settings } = useQuery<SiteSettings>({
+    queryKey: ["/api/site-settings"],
+  });
+
+  useEffect(() => {
+    if (settings) {
+      const root = document.documentElement;
+      root.style.setProperty("--background", settings.backgroundColor);
+      root.style.setProperty("--foreground", settings.textColor);
+      root.style.setProperty("--primary", settings.primaryColor);
+    }
+  }, [settings]);
+
+  return null;
+}
 
 function Router() {
   return (
@@ -33,6 +53,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <ThemeManager />
         <AdminProvider>
           <CartProvider>
             <Toaster />
