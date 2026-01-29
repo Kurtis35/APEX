@@ -71,8 +71,13 @@ export class DatabaseStorage implements IStorage {
 
   async createProduct(product: InsertProduct): Promise<Product> {
     const [newProduct] = await db.insert(products).values({
-      ...product,
-      brandingOptions: product.brandingOptions || [],
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      stockStatus: product.stockStatus,
+      brandingOptions: (product.brandingOptions || []) as string[],
     }).returning();
     return newProduct;
   }
@@ -175,8 +180,8 @@ export class DatabaseStorage implements IStorage {
   async seedData(): Promise<void> {
     const existingAdmins = await db.select().from(admins);
     if (existingAdmins.length === 0) {
-      const hashedPassword = await bcrypt.hash("admin123", 10);
-      await db.insert(admins).values({ username: "admin", password: hashedPassword });
+      const hashedPassword = await bcrypt.hash("jaunapex", 10);
+      await db.insert(admins).values({ username: "jaunapex", password: hashedPassword });
     }
 
     const existingCats = await this.getCategories();

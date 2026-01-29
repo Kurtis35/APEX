@@ -36,7 +36,7 @@ export async function registerRoutes(
   });
 
   app.get(api.products.get.path, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     if (isNaN(id)) {
       return res.status(404).json({ message: "Invalid product ID" });
     }
@@ -146,7 +146,7 @@ export async function registerRoutes(
   });
 
   app.patch("/api/admin/products/:id", requireAdmin, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { name, description, category, price, imageUrl, stockStatus, brandingOptions } = req.body;
     const updates: any = {};
     if (name !== undefined) updates.name = name;
@@ -165,7 +165,7 @@ export async function registerRoutes(
   });
 
   app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const success = await storage.deleteProduct(id);
     if (!success) {
       return res.status(404).json({ message: "Product not found" });
